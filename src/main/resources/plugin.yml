@@ -1,0 +1,14 @@
+name: BreakBlockMoney
+version: 0.1
+main: ru.m1r3nn.breakblockmoney.BreakBlockMoney
+api-version: '1.16'
+author: m1r3nn
+depend:
+  - Vault
+commands:
+  breakblockmoney:
+    permission: breakblockmoney.admin
+    usage: /breakblockmoney <reload|boost>
+permissions:
+  breakblockmoney.admin:
+    default: op

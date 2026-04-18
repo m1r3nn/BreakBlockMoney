@@ -1,0 +1,59 @@
+# Игнорировать ли блоки, которые были установлены игроком?
+ignore-placed-blocks: true
+
+# Чёрный список миров
+worlds:
+  blacklist:
+    - world_nether
+    - world_the_end
+
+# Звук
+sound:
+  enabled: true
+  name: "ENTITY_EXPERIENCE_ORB_PICKUP"
+  volume: 1.0
+  pitch: 1.0
+
+# Форматирование {amount}
+amount-format:
+  decimal-places: 2 # Если 1, показывает как 1.0$, если 2 - 1.00$
+  thousands-separator: true # Добавляет разделение тысяч через запятую (1,000$)
+
+# Комбо
+combo:
+  chance: 5 # Шанс что будет комбо, если 0 то не работает
+  multiplier: 30 # Множитель
+
+# Бусты
+# Если есть более одного права буста, тогда берётся максимальный
+boosts:
+  vip: 1.5 # Умножает на 1.5, например 1.0 * 1.5 = 1.5
+  premium: 2.0 # 1.0 * 2.0 = 2.0
+  elite: 3.0
+
+# Награды
+# Можно добавлять свои награды в неограниченном количестве
+rewards:
+  SHORT_GRASS: 1.0 # Низкая трава +1$
+
+# Сообщения
+# {amount} - сумма, {multiplier} - множитель combo
+# {player} - никнейм, {boost} - название буста, {time} - время
+messages:
+  reward: "&a+{amount}$"
+  reward-combo: "&e+{amount}$ (x{multiplier} Комбо)"
+  reload-success: "&aКонфигурация перезагружена."
+  reload-fail: "&cОшибка при перезагрузке конфигурации."
+  no-permission: "&cНедостаточно прав."
+  boost-given: "&aИгроку &e{player} &aвыдан буст &e{boost} &aна &e{time}"
+  boost-expired: "&cВременный буст истёк."
+  boost-cleared: "&aВсе бусты игрока &e{player} &aочищены."
+  boost-cleared-notify: "&cВсе твои временные бусты были сброшены."
+  boost-removed: "&aБуст &e{boost} &aудалён у игрока &e{player}&a."
+  boost-removed-notify: "&cТвой временный буст &e{boost} &cбыл удалён."
+  boost-not-found: "&cУ игрока &e{player} &cнет активного буста &e{boost}&c."
+  no-active-boosts: "&cУ игрока &e{player} &cнет активных бустов."
+  invalid-player: "&cИгрок &e{player} &cне найден."
+  invalid-boost: "&cБуст &e{boost} &cне найден в конфиге."
+  invalid-time: "&cНеверный формат времени. Используй: 1d2h30m"
+  usage-boost: "&cИспользование: /breakblockmoney boost <игрок> <add/remove/clear> [буст] [время]"
