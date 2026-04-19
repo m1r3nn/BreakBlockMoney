@@ -1,6 +1,9 @@
 # Игнорировать ли блоки, которые были установлены игроком?
 ignore-placed-blocks: true
 
+# Игнорировать ли мобов, заспавненных из спавнера?
+ignore-spawner-mobs: true
+
 # Чёрный список миров
 worlds:
   blacklist:
@@ -31,14 +34,37 @@ boosts:
   premium: 2.0 # 1.0 * 2.0 = 2.0
   elite: 3.0
 
-# Награды
+# Награды за добычу блоков
 # Можно добавлять свои награды в неограниченном количестве
 rewards:
   SHORT_GRASS: 1.0 # Низкая трава +1$
 
+# Награды за убийство мобов
+mob-rewards:
+  ZOMBIE: 5.0
+  SKELETON: 7.5
+  CREEPER: 10.0
+  SPIDER: 5.0
+  ENDERMAN: 15.0
+  WITHER_SKELETON: 25.0
+  BLAZE: 20.0
+  ENDER_DRAGON: 500.0
+  WITHER: 300.0
+
+# Награды за рыбалку
+fishing-rewards:
+  COD: 3.0
+  SALMON: 5.0
+  TROPICAL_FISH: 10.0
+  PUFFERFISH: 8.0
+  BOW: 15.0 # Рыбалка может выловить предметы
+  ENCHANTED_BOOK: 25.0
+  NAME_TAG: 20.0
+  SADDLE: 20.0
+
 # Сообщения
 # {amount} - сумма, {multiplier} - множитель combo
-# {player} - никнейм, {boost} - название буста, {time} - время
+# {player} - имя игрока, {boost} - название буста, {time} - время
 messages:
   reward: "&a+{amount}$"
   reward-combo: "&e+{amount}$ (x{multiplier} Комбо)"
@@ -46,7 +72,7 @@ messages:
   reload-fail: "&cОшибка при перезагрузке конфигурации."
   no-permission: "&cНедостаточно прав."
   boost-given: "&aИгроку &e{player} &aвыдан буст &e{boost} &aна &e{time}"
-  boost-expired: "&cВременный буст истёк."
+  boost-expired: "&cТвой временный буст &e{boost} &cистёк."
   boost-cleared: "&aВсе бусты игрока &e{player} &aочищены."
   boost-cleared-notify: "&cВсе твои временные бусты были сброшены."
   boost-removed: "&aБуст &e{boost} &aудалён у игрока &e{player}&a."
@@ -56,4 +82,7 @@ messages:
   invalid-player: "&cИгрок &e{player} &cне найден."
   invalid-boost: "&cБуст &e{boost} &cне найден в конфиге."
   invalid-time: "&cНеверный формат времени. Используй: 1d2h30m"
-  usage-boost: "&cИспользование: /breakblockmoney boost <игрок> <add/remove/clear> [буст] [время]"
+  usage-boost: "&cИспользование: /breakblockmoney boost <игрок> <add/remove/clear/list> [буст] [время]"
+  boost-list-header: "&6Активные бусты игрока &e{player}&6:"
+  boost-list-entry: "&7- &e{boost} &7(осталось &f{time}&7)"
+  boost-list-empty: "&7У игрока &e{player} &7нет активных бустов."

@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -19,12 +20,15 @@ import java.util.logging.Logger;
 
 public class PluginConfig {
 
-    private Map<Material, Double> rewards;
+    private Map<Material, Double> blockRewards;
+    private Map<EntityType, Double> mobRewards;
+    private Map<Material, Double> fishingRewards;
     private Map<String, Double> boosts;
     private Set<String> blacklistedWorlds;
     private final MessageConfig messageConfig = new MessageConfig();
 
     private boolean ignorePlacedBlocks;
+    private boolean ignoreSpawnerMobs;
     private boolean soundEnabled;
     private Sound sound;
     private float soundVolume;
@@ -47,10 +51,13 @@ public class PluginConfig {
     }
 
     private void applyValues(FileConfiguration config, Logger logger) {
-        this.rewards = loadRewards(config, logger);
+        this.blockRewards = loadBlockRewards(config, logger);
+        this.mobRewards = loadMobRewards(config, logger);
+        this.fishingRewards = loadFishingRewards(config, logger);
         this.boosts = loadBoosts(config, logger);
         this.blacklistedWorlds = loadBlacklist(config);
         this.ignorePlacedBlocks = config.getBoolean("ignore-placed-blocks", true);
+        this.ignoreSpawnerMobs = config.getBoolean("ignore-spawner-mobs", true);
         this.soundEnabled = config.getBoolean("sound.enabled", true);
         this.sound = loadSound(config, logger);
         this.soundVolume = (float) config.getDouble("sound.volume", 1.0);
@@ -61,29 +68,61 @@ public class PluginConfig {
         this.messageConfig.load(config);
     }
 
-    private static Map<Material, Double> loadRewards(FileConfiguration config, Logger logger) {
-        Map<Material, Double> rewards = new EnumMap<>(Material.class);
-        ConfigurationSection section = config.getConfigurationSection("rewards");
+    private static Map<Material, Double> loadBlockRewards(FileConfiguration config, Logger logger) {
+        return loadMaterialSection(config, "rewards", logger);
+    }
 
-        if (section == null) {
-            logger.warning("Секция rewards отсутствует в config.yml.");
-            return rewards;
-        }
+    private static Map<Material, Double> loadFishingRewards(FileConfiguration config, Logger logger) {
+        return loadMaterialSection(config, "fishing-rewards", logger);
+    }
+
+    private static Map<Material, Double> loadMaterialSection(FileConfiguration config, String sectionName, Logger logger) {
+        Map<Material, Double> rewards = new EnumMap<>(Material.class);
+        ConfigurationSection section = config.getConfigurationSection(sectionName);
+
+        if (section == null) return rewards;
 
         for (String key : section.getKeys(false)) {
             Material material = Material.matchMaterial(key);
             if (material == null) {
-                logger.warning("Неизвестный материал в rewards: " + key);
+                logger.warning("Неизвестный материал в " + sectionName + ": " + key);
                 continue;
             }
 
             double amount = section.getDouble(key);
             if (amount <= 0) {
-                logger.warning("Награда для " + key + " <= 0, пропущена.");
+                logger.warning("Награда для " + key + " в " + sectionName + " <= 0, пропущена.");
                 continue;
             }
 
             rewards.put(material, amount);
+        }
+
+        return rewards;
+    }
+
+    private static Map<EntityType, Double> loadMobRewards(FileConfiguration config, Logger logger) {
+        Map<EntityType, Double> rewards = new EnumMap<>(EntityType.class);
+        ConfigurationSection section = config.getConfigurationSection("mob-rewards");
+
+        if (section == null) return rewards;
+
+        for (String key : section.getKeys(false)) {
+            EntityType entityType;
+            try {
+                entityType = EntityType.valueOf(key.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                logger.warning("Неизвестный тип моба в mob-rewards: " + key);
+                continue;
+            }
+
+            double amount = section.getDouble(key);
+            if (amount <= 0) {
+                logger.warning("Награда для моба " + key + " <= 0, пропущена.");
+                continue;
+            }
+
+            rewards.put(entityType, amount);
         }
 
         return rewards;
@@ -161,12 +200,28 @@ public class PluginConfig {
         return Collections.unmodifiableMap(boosts);
     }
 
-    public Double getReward(Material material) {
-        return rewards.get(material);
+    public Double getBlockReward(Material material) {
+        return blockRewards.get(material);
+    }
+
+    public Double getMobReward(EntityType entityType) {
+        return mobRewards.get(entityType);
+    }
+
+    public Double getFishingReward(Material material) {
+        return fishingRewards.get(material);
     }
 
     public boolean isWorldBlacklisted(String worldName) {
         return blacklistedWorlds.contains(worldName);
+    }
+
+    public boolean shouldIgnorePlacedBlocks() {
+        return ignorePlacedBlocks;
+    }
+
+    public boolean shouldIgnoreSpawnerMobs() {
+        return ignoreSpawnerMobs;
     }
 
     public boolean isSoundEnabled() {
@@ -183,10 +238,6 @@ public class PluginConfig {
 
     public float getSoundPitch() {
         return soundPitch;
-    }
-
-    public boolean shouldIgnorePlacedBlocks() {
-        return ignorePlacedBlocks;
     }
 
     public DecimalFormat getAmountFormat() {

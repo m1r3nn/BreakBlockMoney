@@ -1,7 +1,5 @@
 package ru.m1r3nn.breakblockmoney.listener;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -13,24 +11,21 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
-import ru.m1r3nn.breakblockmoney.boost.BoostService;
 import ru.m1r3nn.breakblockmoney.config.PluginConfig;
-import ru.m1r3nn.breakblockmoney.economy.EconomyProvider;
+import ru.m1r3nn.breakblockmoney.service.RewardService;
 
 public class BlockListener implements Listener {
 
     private static final String PLACED_KEY = "bbm_placed";
 
     private final Plugin plugin;
-    private final EconomyProvider economyProvider;
     private final PluginConfig pluginConfig;
-    private final BoostService boostService;
+    private final RewardService rewardService;
 
-    public BlockListener(Plugin plugin, EconomyProvider economyProvider, PluginConfig pluginConfig, BoostService boostService) {
+    public BlockListener(Plugin plugin, PluginConfig pluginConfig, RewardService rewardService) {
         this.plugin = plugin;
-        this.economyProvider = economyProvider;
         this.pluginConfig = pluginConfig;
-        this.boostService = boostService;
+        this.rewardService = rewardService;
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -43,37 +38,15 @@ public class BlockListener implements Listener {
         if (pluginConfig.shouldIgnorePlacedBlocks() && block.hasMetadata(PLACED_KEY)) return;
 
         Material type = block.getType();
-        Double baseReward = pluginConfig.getReward(type);
+        Double baseReward = pluginConfig.getBlockReward(type);
         if (baseReward == null) return;
 
-        double multiplier = boostService.getTotalMultiplier(player);
-        boolean isCombo = pluginConfig.rollCombo();
-
-        double finalReward = isCombo
-                ? baseReward * multiplier * pluginConfig.getComboMultiplier()
-                : baseReward * multiplier;
-
-        economyProvider.deposit(player, finalReward);
-        sendActionBar(player, isCombo, finalReward);
-        playSound(player);
+        rewardService.giveReward(player, baseReward);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
         if (!pluginConfig.shouldIgnorePlacedBlocks()) return;
         event.getBlock().setMetadata(PLACED_KEY, new FixedMetadataValue(plugin, true));
-    }
-
-    private void sendActionBar(Player player, boolean isCombo, double amount) {
-        String message = isCombo
-                ? pluginConfig.messages().buildRewardComboMessage(amount, pluginConfig.getComboMultiplier(), pluginConfig.getAmountFormat())
-                : pluginConfig.messages().buildRewardMessage(amount, pluginConfig.getAmountFormat());
-
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(message));
-    }
-
-    private void playSound(Player player) {
-        if (!pluginConfig.isSoundEnabled()) return;
-        player.playSound(player.getLocation(), pluginConfig.getSound(), pluginConfig.getSoundVolume(), pluginConfig.getSoundPitch());
     }
 }

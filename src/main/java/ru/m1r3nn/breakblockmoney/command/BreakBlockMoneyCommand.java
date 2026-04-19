@@ -12,6 +12,7 @@ import ru.m1r3nn.breakblockmoney.config.MessageConfig;
 import ru.m1r3nn.breakblockmoney.config.PluginConfig;
 import ru.m1r3nn.breakblockmoney.util.TimeParser;
 
+import java.util.List;
 import java.util.UUID;
 
 public class BreakBlockMoneyCommand implements CommandExecutor {
@@ -72,6 +73,7 @@ public class BreakBlockMoneyCommand implements CommandExecutor {
             case "clear" -> handleBoostClear(sender, targetName, targetUuid, target);
             case "remove" -> handleBoostRemove(sender, targetName, targetUuid, target, args);
             case "add" -> handleBoostAdd(sender, targetName, targetUuid, target, args);
+            case "list" -> handleBoostList(sender, targetName, targetUuid);
             default -> sender.sendMessage(messages.getUsageBoostMessage());
         }
     }
@@ -136,9 +138,29 @@ public class BreakBlockMoneyCommand implements CommandExecutor {
         long expiresAt = System.currentTimeMillis() + durationMillis;
         boostStorage.addBoost(uuid, new BoostEntry(boostName, expiresAt));
 
-        sender.sendMessage(messages.buildBoostGivenMessage(name, boostName, TimeParser.format(durationMillis)));
+        String formattedTime = TimeParser.format(durationMillis);
+        sender.sendMessage(messages.buildBoostGivenMessage(name, boostName, formattedTime));
         if (target != null) {
-            target.sendMessage(messages.buildBoostGivenMessage(name, boostName, TimeParser.format(durationMillis)));
+            target.sendMessage(messages.buildBoostGivenMessage(name, boostName, formattedTime));
+        }
+    }
+
+    private void handleBoostList(CommandSender sender, String name, UUID uuid) {
+        MessageConfig messages = pluginConfig.messages();
+        List<BoostEntry> activeBoosts = boostStorage.getActiveBoosts(uuid);
+
+        if (activeBoosts.isEmpty()) {
+            sender.sendMessage(messages.buildBoostListEmpty(name));
+            return;
+        }
+
+        sender.sendMessage(messages.buildBoostListHeader(name));
+
+        long now = System.currentTimeMillis();
+        for (BoostEntry entry : activeBoosts) {
+            long remaining = entry.getExpiresAt() - now;
+            String timeLeft = TimeParser.format(Math.max(remaining, 0));
+            sender.sendMessage(messages.buildBoostListEntry(entry.getBoostName(), timeLeft));
         }
     }
 

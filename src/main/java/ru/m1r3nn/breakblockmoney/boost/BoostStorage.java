@@ -59,6 +59,12 @@ public class BoostStorage {
                 .collect(Collectors.toUnmodifiableList());
     }
 
+    public List<BoostEntry> getAllBoosts(UUID uuid) {
+        List<BoostEntry> boosts = activeBoosts.get(uuid);
+        if (boosts == null) return Collections.emptyList();
+        return List.copyOf(boosts);
+    }
+
     public void cleanupExpired() {
         boolean changed = false;
 

@@ -13,7 +13,7 @@ import java.util.List;
 public class BreakBlockMoneyTabCompleter implements TabCompleter {
 
     private static final List<String> SUBCOMMANDS = List.of("reload", "boost");
-    private static final List<String> BOOST_ACTIONS = List.of("add", "remove", "clear");
+    private static final List<String> BOOST_ACTIONS = List.of("add", "remove", "clear", "list");
     private static final List<String> TIME_EXAMPLES = List.of("1h", "30m", "1d", "1d12h");
 
     private final PluginConfig pluginConfig;
@@ -52,8 +52,9 @@ public class BreakBlockMoneyTabCompleter implements TabCompleter {
 
     private List<String> filter(List<String> options, String input) {
         List<String> result = new ArrayList<>();
+        String lower = input.toLowerCase();
         for (String option : options) {
-            if (option.toLowerCase().startsWith(input.toLowerCase())) {
+            if (option.toLowerCase().startsWith(lower)) {
                 result.add(option);
             }
         }
@@ -62,8 +63,9 @@ public class BreakBlockMoneyTabCompleter implements TabCompleter {
 
     private List<String> filterPlayers(String input) {
         List<String> result = new ArrayList<>();
+        String lower = input.toLowerCase();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.getName().toLowerCase().startsWith(input.toLowerCase())) {
+            if (player.getName().toLowerCase().startsWith(lower)) {
                 result.add(player.getName());
             }
         }
