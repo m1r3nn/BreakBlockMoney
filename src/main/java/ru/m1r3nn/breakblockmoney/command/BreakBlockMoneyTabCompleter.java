@@ -15,6 +15,7 @@ public class BreakBlockMoneyTabCompleter implements TabCompleter {
     private static final List<String> SUBCOMMANDS = List.of("reload", "boost");
     private static final List<String> BOOST_ACTIONS = List.of("add", "remove", "clear", "list");
     private static final List<String> TIME_EXAMPLES = List.of("1h", "30m", "1d", "1d12h");
+    private static final List<String> SILENT_FLAG = List.of("-s");
 
     private final PluginConfig pluginConfig;
 
@@ -38,11 +39,24 @@ public class BreakBlockMoneyTabCompleter implements TabCompleter {
                 if (action.equals("add") || action.equals("remove")) {
                     yield filter(new ArrayList<>(pluginConfig.getBoostNames()), args[3]);
                 }
+                if (action.equals("clear")) {
+                    yield filter(SILENT_FLAG, args[3]);
+                }
                 yield List.of();
             }
             case 5 -> {
-                if (args[2].equalsIgnoreCase("add")) {
+                String action = args[2].toLowerCase();
+                if (action.equals("add")) {
                     yield filter(TIME_EXAMPLES, args[4]);
+                }
+                if (action.equals("remove")) {
+                    yield filter(SILENT_FLAG, args[4]);
+                }
+                yield List.of();
+            }
+            case 6 -> {
+                if (args[2].equalsIgnoreCase("add")) {
+                    yield filter(SILENT_FLAG, args[5]);
                 }
                 yield List.of();
             }
