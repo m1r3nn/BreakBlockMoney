@@ -12,7 +12,6 @@ import ru.m1r3nn.breakblockmoney.config.MessageConfig;
 import ru.m1r3nn.breakblockmoney.config.PluginConfig;
 import ru.m1r3nn.breakblockmoney.util.TimeParser;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,12 +29,16 @@ public class BreakBlockMoneyCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length == 0) return false;
+        if (args.length == 0) {
+            return false;
+        }
 
         switch (args[0].toLowerCase()) {
             case "reload" -> handleReload(sender);
             case "boost" -> handleBoost(sender, args);
-            default -> { return false; }
+            default -> {
+                return false;
+            }
         }
 
         return true;
@@ -71,23 +74,29 @@ public class BreakBlockMoneyCommand implements CommandExecutor {
         }
 
         boolean silent = hasSilentFlag(args);
+        int effectiveLength = silent ? args.length - 1 : args.length;
 
         switch (args[2].toLowerCase()) {
-            case "clear" -> handleBoostClear(sender, targetName, targetUuid, target, silent);
-            case "remove" -> handleBoostRemove(sender, targetName, targetUuid, target, args, silent);
-            case "add" -> handleBoostAdd(sender, targetName, targetUuid, target, args, silent);
-            case "list" -> handleBoostList(sender, targetName, targetUuid);
+            case "clear" -> handleBoostClear(sender, targetName, targetUuid, target, silent, effectiveLength);
+            case "remove" -> handleBoostRemove(sender, targetName, targetUuid, target, args, silent, effectiveLength);
+            case "add" -> handleBoostAdd(sender, targetName, targetUuid, target, args, silent, effectiveLength);
+            case "list" -> handleBoostList(sender, targetName, targetUuid, effectiveLength);
             default -> sender.sendMessage(messages.getUsageBoostMessage());
         }
     }
 
-    private void handleBoostClear(CommandSender sender, String name, UUID uuid, Player target, boolean silent) {
+    private void handleBoostClear(CommandSender sender, String name, UUID uuid, Player target, boolean silent, int effectiveLength) {
         MessageConfig messages = pluginConfig.messages();
-        boolean had = boostStorage.clearBoosts(uuid);
 
+        if (effectiveLength != 3) {
+            sender.sendMessage(messages.getUsageBoostMessage());
+            return;
+        }
+
+        boolean had = boostStorage.clearBoosts(uuid);
         if (had) {
             sender.sendMessage(messages.buildBoostClearMessage(name));
-            if (!silent && target != null && !target.equals(sender)) {
+            if (shouldNotify(sender, target, silent)) {
                 target.sendMessage(messages.getBoostClearedNotifyMessage());
             }
         } else {
@@ -95,10 +104,10 @@ public class BreakBlockMoneyCommand implements CommandExecutor {
         }
     }
 
-    private void handleBoostRemove(CommandSender sender, String name, UUID uuid, Player target, String[] args, boolean silent) {
+    private void handleBoostRemove(CommandSender sender, String name, UUID uuid, Player target, String[] args, boolean silent, int effectiveLength) {
         MessageConfig messages = pluginConfig.messages();
 
-        if (args.length < 4) {
+        if (effectiveLength != 4) {
             sender.sendMessage(messages.getUsageBoostMessage());
             return;
         }
@@ -112,7 +121,7 @@ public class BreakBlockMoneyCommand implements CommandExecutor {
         boolean removed = boostStorage.removeBoost(uuid, boostName);
         if (removed) {
             sender.sendMessage(messages.buildBoostRemovedMessage(name, boostName));
-            if (!silent && target != null && !target.equals(sender)) {
+            if (shouldNotify(sender, target, silent)) {
                 target.sendMessage(messages.buildBoostRemovedNotifyMessage(boostName));
             }
         } else {
@@ -120,10 +129,10 @@ public class BreakBlockMoneyCommand implements CommandExecutor {
         }
     }
 
-    private void handleBoostAdd(CommandSender sender, String name, UUID uuid, Player target, String[] args, boolean silent) {
+    private void handleBoostAdd(CommandSender sender, String name, UUID uuid, Player target, String[] args, boolean silent, int effectiveLength) {
         MessageConfig messages = pluginConfig.messages();
 
-        if (args.length < 5) {
+        if (effectiveLength != 5) {
             sender.sendMessage(messages.getUsageBoostMessage());
             return;
         }
@@ -147,15 +156,20 @@ public class BreakBlockMoneyCommand implements CommandExecutor {
 
         String formattedTime = TimeParser.format(durationMillis);
         sender.sendMessage(messages.buildBoostGivenMessage(name, boostName, formattedTime));
-        if (!silent && target != null && !target.equals(sender)) {
-            target.sendMessage(messages.buildBoostGivenMessage(name, boostName, formattedTime));
+        if (shouldNotify(sender, target, silent)) {
+            target.sendMessage(messages.buildBoostGivenNotifyMessage(boostName, formattedTime));
         }
     }
 
-    private void handleBoostList(CommandSender sender, String name, UUID uuid) {
+    private void handleBoostList(CommandSender sender, String name, UUID uuid, int effectiveLength) {
         MessageConfig messages = pluginConfig.messages();
-        List<BoostEntry> activeBoosts = boostStorage.getActiveBoosts(uuid);
 
+        if (effectiveLength != 3) {
+            sender.sendMessage(messages.getUsageBoostMessage());
+            return;
+        }
+
+        List<BoostEntry> activeBoosts = boostStorage.getActiveBoosts(uuid);
         if (activeBoosts.isEmpty()) {
             sender.sendMessage(messages.buildBoostListEmpty(name));
             return;
@@ -171,8 +185,15 @@ public class BreakBlockMoneyCommand implements CommandExecutor {
         }
     }
 
+    private boolean shouldNotify(CommandSender sender, Player target, boolean silent) {
+        if (silent) return false;
+        if (target == null) return false;
+        if (!(sender instanceof Player senderPlayer)) return true;
+        return !senderPlayer.getUniqueId().equals(target.getUniqueId());
+    }
+
     private boolean hasSilentFlag(String[] args) {
-        return Arrays.asList(args).contains("-s");
+        return args.length > 0 && args[args.length - 1].equalsIgnoreCase("-s");
     }
 
     @SuppressWarnings("deprecation")

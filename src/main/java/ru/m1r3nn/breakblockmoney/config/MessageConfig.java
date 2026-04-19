@@ -12,7 +12,9 @@ public class MessageConfig {
     private String reloadSuccessMessage;
     private String reloadFailMessage;
     private String noPermissionMessage;
+
     private String boostGivenMessage;
+    private String boostGivenNotifyMessage;
     private String boostExpiredMessage;
     private String boostClearedMessage;
     private String boostClearedNotifyMessage;
@@ -20,10 +22,12 @@ public class MessageConfig {
     private String boostRemovedNotifyMessage;
     private String boostNotFoundMessage;
     private String noActiveBoostsMessage;
+
     private String invalidPlayerMessage;
     private String invalidBoostMessage;
     private String invalidTimeMessage;
     private String usageBoostMessage;
+
     private String boostListHeader;
     private String boostListEntry;
     private String boostListEmpty;
@@ -34,7 +38,9 @@ public class MessageConfig {
         this.reloadSuccessMessage = colorize(config.getString("messages.reload-success", "&aКонфигурация перезагружена."));
         this.reloadFailMessage = colorize(config.getString("messages.reload-fail", "&cОшибка при перезагрузке."));
         this.noPermissionMessage = colorize(config.getString("messages.no-permission", "&cНедостаточно прав."));
+
         this.boostGivenMessage = config.getString("messages.boost-given", "&aИгроку &e{player} &aвыдан буст &e{boost} &aна &e{time}");
+        this.boostGivenNotifyMessage = config.getString("messages.boost-given-notify", "&aТебе выдан временный буст &e{boost} &aна &e{time}");
         this.boostExpiredMessage = config.getString("messages.boost-expired", "&cТвой временный буст &e{boost} &cистёк.");
         this.boostClearedMessage = config.getString("messages.boost-cleared", "&aВсе бусты игрока &e{player} &aочищены.");
         this.boostClearedNotifyMessage = colorize(config.getString("messages.boost-cleared-notify", "&cВсе твои временные бусты были сброшены."));
@@ -42,10 +48,12 @@ public class MessageConfig {
         this.boostRemovedNotifyMessage = config.getString("messages.boost-removed-notify", "&cТвой временный буст &e{boost} &cбыл удалён.");
         this.boostNotFoundMessage = config.getString("messages.boost-not-found", "&cУ игрока &e{player} &cнет активного буста &e{boost}&c.");
         this.noActiveBoostsMessage = config.getString("messages.no-active-boosts", "&cУ игрока &e{player} &cнет активных бустов.");
+
         this.invalidPlayerMessage = config.getString("messages.invalid-player", "&cИгрок &e{player} &cне найден.");
         this.invalidBoostMessage = config.getString("messages.invalid-boost", "&cБуст &e{boost} &cне найден в конфиге.");
         this.invalidTimeMessage = colorize(config.getString("messages.invalid-time", "&cНеверный формат времени. Используй: 1d2h30m"));
-        this.usageBoostMessage = colorize(config.getString("messages.usage-boost", "&cИспользование: /breakblockmoney boost <игрок> <add/remove/clear/list> [буст] [время]"));
+        this.usageBoostMessage = colorize(config.getString("messages.usage-boost", "&cИспользование: /breakblockmoney boost <игрок> <add/remove/clear/list> [буст] [время] [-s]"));
+
         this.boostListHeader = config.getString("messages.boost-list-header", "&6Активные бусты игрока &e{player}&6:");
         this.boostListEntry = config.getString("messages.boost-list-entry", "&7- &e{boost} &7(осталось &f{time}&7)");
         this.boostListEmpty = config.getString("messages.boost-list-empty", "&7У игрока &e{player} &7нет активных бустов.");
@@ -66,6 +74,16 @@ public class MessageConfig {
                 .replace("{player}", playerName)
                 .replace("{boost}", boostName)
                 .replace("{time}", time));
+    }
+
+    public String buildBoostGivenNotifyMessage(String boostName, String time) {
+        return colorize(boostGivenNotifyMessage
+                .replace("{boost}", boostName)
+                .replace("{time}", time));
+    }
+
+    public String buildBoostExpiredMessage(String boostName) {
+        return colorize(boostExpiredMessage.replace("{boost}", boostName));
     }
 
     public String buildBoostClearMessage(String playerName) {
@@ -98,10 +116,6 @@ public class MessageConfig {
 
     public String buildNoActiveBoostsMessage(String playerName) {
         return colorize(noActiveBoostsMessage.replace("{player}", playerName));
-    }
-
-    public String buildBoostExpiredMessage(String boostName) {
-        return colorize(boostExpiredMessage.replace("{boost}", boostName));
     }
 
     public String buildBoostListHeader(String playerName) {
