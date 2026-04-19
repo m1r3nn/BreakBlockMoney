@@ -29,23 +29,30 @@ public class BreakBlockMoneyCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        MessageConfig messages = pluginConfig.messages();
+
         if (args.length == 0) {
-            return false;
+            messages.getHelpMessages().forEach(sender::sendMessage);
+            return true;
         }
 
         switch (args[0].toLowerCase()) {
-            case "reload" -> handleReload(sender);
+            case "reload" -> handleReload(sender, args);
             case "boost" -> handleBoost(sender, args);
-            default -> {
-                return false;
-            }
+            default -> sender.sendMessage(messages.getUnknownSubcommandMessage());
         }
 
         return true;
     }
 
-    private void handleReload(CommandSender sender) {
+    private void handleReload(CommandSender sender, String[] args) {
         MessageConfig messages = pluginConfig.messages();
+
+        if (args.length != 1) {
+            sender.sendMessage(messages.getUnknownSubcommandMessage());
+            return;
+        }
+
         try {
             plugin.reloadConfig();
             pluginConfig.reload(plugin.getConfig(), plugin.getLogger());
