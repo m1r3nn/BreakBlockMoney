@@ -8,7 +8,6 @@ depend:
 commands:
   breakblockmoney:
     permission: breakblockmoney.admin
-    usage: /breakblockmoney <reload|boost>
 permissions:
   breakblockmoney.admin:
     default: op
