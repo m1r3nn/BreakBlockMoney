@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 public class MessageConfig {
 
@@ -27,10 +28,13 @@ public class MessageConfig {
     private String invalidBoostMessage;
     private String invalidTimeMessage;
     private String usageBoostMessage;
+    private String unknownSubcommandMessage;
 
     private String boostListHeader;
     private String boostListEntry;
     private String boostListEmpty;
+
+    private List<String> helpMessages;
 
     void load(FileConfiguration config) {
         this.rewardTemplate = config.getString("messages.reward", "&a+{amount}$");
@@ -53,10 +57,25 @@ public class MessageConfig {
         this.invalidBoostMessage = config.getString("messages.invalid-boost", "&cБуст &e{boost} &cне найден в конфиге.");
         this.invalidTimeMessage = colorize(config.getString("messages.invalid-time", "&cНеверный формат времени. Используй: 1d2h30m"));
         this.usageBoostMessage = colorize(config.getString("messages.usage-boost", "&cИспользование: /breakblockmoney boost <игрок> <add/remove/clear/list> [буст] [время] [-s]"));
+        this.unknownSubcommandMessage = colorize(config.getString("messages.unknown-subcommand", "&cНеизвестная подкоманда. Используй &e/breakblockmoney &cдля списка команд."));
 
         this.boostListHeader = config.getString("messages.boost-list-header", "&6Активные бусты игрока &e{player}&6:");
         this.boostListEntry = config.getString("messages.boost-list-entry", "&7- &e{boost} &7(осталось &f{time}&7)");
         this.boostListEmpty = config.getString("messages.boost-list-empty", "&7У игрока &e{player} &7нет активных бустов.");
+
+        this.helpMessages = config.getStringList("messages.help");
+        if (this.helpMessages.isEmpty()) {
+            this.helpMessages = List.of(
+                    "&6&lBreakBlockMoney &7- Помощь по плагину:",
+                    "&e/breakblockmoney reload &7- перезагрузка конфига",
+                    "&e/breakblockmoney boost <игрок> add <буст> <время> [-s] &7- выдать буст",
+                    "&e/breakblockmoney boost <игрок> remove <буст> [-s] &7- удалить буст",
+                    "&e/breakblockmoney boost <игрок> clear [-s] &7- очистить все бусты",
+                    "&e/breakblockmoney boost <игрок> list &7- список активных бустов",
+                    "",
+                    "&7Флаг &e-s &7- тихая выдача без уведомления игроку."
+            );
+        }
     }
 
     public String buildRewardMessage(double amount, DecimalFormat format) {
@@ -132,6 +151,12 @@ public class MessageConfig {
         return colorize(boostListEmpty.replace("{player}", playerName));
     }
 
+    public List<String> getHelpMessages() {
+        return helpMessages.stream()
+                .map(MessageConfig::colorize)
+                .toList();
+    }
+
     public String getReloadSuccessMessage() {
         return reloadSuccessMessage;
     }
@@ -154,6 +179,10 @@ public class MessageConfig {
 
     public String getUsageBoostMessage() {
         return usageBoostMessage;
+    }
+
+    public String getUnknownSubcommandMessage() {
+        return unknownSubcommandMessage;
     }
 
     private static String colorize(String text) {

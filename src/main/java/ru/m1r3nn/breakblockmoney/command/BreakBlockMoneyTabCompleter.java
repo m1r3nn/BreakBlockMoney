@@ -31,11 +31,12 @@ public class BreakBlockMoneyTabCompleter implements TabCompleter {
 
         if (!args[0].equalsIgnoreCase("boost")) return List.of();
 
+        String action = args.length >= 3 ? args[2].toLowerCase() : "";
+
         return switch (args.length) {
             case 2 -> filterPlayers(args[1]);
             case 3 -> filter(BOOST_ACTIONS, args[2]);
             case 4 -> {
-                String action = args[2].toLowerCase();
                 if (action.equals("add") || action.equals("remove")) {
                     yield filter(new ArrayList<>(pluginConfig.getBoostNames()), args[3]);
                 }
@@ -45,7 +46,6 @@ public class BreakBlockMoneyTabCompleter implements TabCompleter {
                 yield List.of();
             }
             case 5 -> {
-                String action = args[2].toLowerCase();
                 if (action.equals("add")) {
                     yield filter(TIME_EXAMPLES, args[4]);
                 }
@@ -55,7 +55,7 @@ public class BreakBlockMoneyTabCompleter implements TabCompleter {
                 yield List.of();
             }
             case 6 -> {
-                if (args[2].equalsIgnoreCase("add")) {
+                if (action.equals("add")) {
                     yield filter(SILENT_FLAG, args[5]);
                 }
                 yield List.of();

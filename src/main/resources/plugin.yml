@@ -1,5 +1,5 @@
 name: BreakBlockMoney
-version: 0.1
+version: 0.2.1
 main: ru.m1r3nn.breakblockmoney.BreakBlockMoney
 api-version: '1.16'
 author: m1r3nn
